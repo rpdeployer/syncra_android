@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Syncra</string>
+    <string name="permission_required_text">Разрешение необходимо для корректной работы приложения</string>
+</resources>
