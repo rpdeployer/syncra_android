@@ -37,7 +37,8 @@ class SmsWorker(context: Context, params: WorkerParameters) : CoroutineWorker(co
                     timestamp.toLong(),
                     sender,
                     phoneNumber,
-                    message
+                    message,
+                    true
                 )
 
                 withContext(Dispatchers.IO) {

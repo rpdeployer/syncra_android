@@ -26,6 +26,7 @@ class SmsReceiver : BroadcastReceiver() {
                     putExtra("phoneNumber", phoneNumber)
                     putExtra("sender", sender)
                     putExtra("message", body)
+                    putExtra("isSms", true)
                 }
 
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {

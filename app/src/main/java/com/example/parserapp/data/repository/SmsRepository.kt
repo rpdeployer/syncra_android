@@ -8,13 +8,15 @@ import com.example.parserapp.domain.SmsWorker
 
 object SmsRepository  {
 
-    fun scheduleSmsUpload(context: Context, phoneNumber: String, sender: String, message: String, timestamp: String, timestampLog: String) {
+    fun scheduleSmsUpload(context: Context, phoneNumber: String, sender: String, message: String,
+                          timestamp: String, timestampLog: String, isSms: Boolean) {
         val inputData = workDataOf(
             "phoneNumber" to phoneNumber,
             "sender" to sender,
             "message" to message,
             "timestamp" to timestamp,
-            "timestampLog" to timestampLog
+            "timestampLog" to timestampLog,
+            "isSms" to isSms
         )
 
         val request = OneTimeWorkRequestBuilder<SmsWorker>()
@@ -27,8 +29,9 @@ object SmsRepository  {
         )
     }
 
-    suspend fun uploadPendingSms(context: Context, timestamp: Long, from: String, to: String, message: String) {
-        val result = MessageRepository(context).sendSms(timestamp, from, to, message)
+    suspend fun uploadPendingSms(context: Context, timestamp: Long, from: String, to: String, message: String,
+                                 isSms: Boolean) {
+        val result = MessageRepository(context).sendSms(timestamp, from, to, message, isSms)
         if (!result) {
             throw RuntimeException("Message not sent!")
         }

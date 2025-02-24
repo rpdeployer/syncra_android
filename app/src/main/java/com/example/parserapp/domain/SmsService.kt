@@ -26,6 +26,7 @@ class SmsService : Service() {
         val phoneNumber = intent?.getStringExtra("phoneNumber") ?: return START_NOT_STICKY
         val sender = intent.getStringExtra("sender") ?: return START_NOT_STICKY
         val message = intent.getStringExtra("message") ?: return START_NOT_STICKY
+        val isSms = intent.getBooleanExtra("isSms", true)
         val timestampLog = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault()).format(Date())
         val timestamp = Clock.systemUTC().instant().toEpochMilli()
 
@@ -41,7 +42,8 @@ class SmsService : Service() {
                 dao.insertMessage(ProcessedMessageEntity(sender = sender, message = message, timestamp = timestamp))
                 Log.d("ParserSms", "📩 Обрабатываем новое сообщение от: $sender")
 
-                SmsRepository.scheduleSmsUpload(this@SmsService, phoneNumber, sender, message, timestamp.toString(), timestampLog)
+                SmsRepository.scheduleSmsUpload(this@SmsService, phoneNumber, sender, message,
+                    timestamp.toString(), timestampLog, isSms)
             }
 
             val expiryTime = System.currentTimeMillis() - (24 * 60 * 60 * 1000)

@@ -25,9 +25,9 @@ class MessageRepository(context: Context) {
         Settings.Secure.ANDROID_ID
     )
 
-    suspend fun sendSms(timestamp: Long, from: String, to: String, message: String): Boolean {
+    suspend fun sendSms(timestamp: Long, from: String, to: String, message: String, isSms: Boolean): Boolean {
         val request = MessageRequest(
-            from, to, timestamp, message
+            from, to, timestamp, message, isSms
         )
         return try {
             val response = messageService.sendSms(request)
