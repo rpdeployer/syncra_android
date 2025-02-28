@@ -17,6 +17,7 @@ class PermissionManager @Inject constructor(
 ) {
     private lateinit var smsPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var phonePermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var phoneStatePermissionLauncher: ActivityResultLauncher<String>
     private lateinit var cameraPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var networkPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var pushPermissionLauncher: ActivityResultLauncher<Intent>
@@ -29,6 +30,7 @@ class PermissionManager @Inject constructor(
     private val phoneStateNumbersPermission = android.Manifest.permission.READ_PHONE_STATE
 
     fun initializePermissionLaunchers(
+        phoneStateLauncher: ActivityResultLauncher<String>,
         phoneLauncher: ActivityResultLauncher<String>,
         smsLauncher: ActivityResultLauncher<String>,
         cameraLauncher: ActivityResultLauncher<String>,
@@ -36,6 +38,7 @@ class PermissionManager @Inject constructor(
         pushLauncher: ActivityResultLauncher<Intent>,
         batteryLauncher: ActivityResultLauncher<Intent>
     ) {
+        phoneStatePermissionLauncher = phoneStateLauncher
         phonePermissionLauncher = phoneLauncher
         smsPermissionLauncher = smsLauncher
         cameraPermissionLauncher = cameraLauncher
@@ -54,7 +57,10 @@ class PermissionManager @Inject constructor(
 
     fun requestPhonePermission() {
         phonePermissionLauncher.launch(phoneNumbersPermission)
-        phonePermissionLauncher.launch(phoneStateNumbersPermission)
+    }
+
+    fun requestPhoneStatePermission() {
+        phoneStatePermissionLauncher.launch(phoneStateNumbersPermission)
     }
 
     fun requestCameraPermission() {
@@ -83,6 +89,10 @@ class PermissionManager @Inject constructor(
 
     fun isPhonePermissionGranted(): Boolean {
         return checkPermissionFor(phoneNumbersPermission)
+    }
+
+    fun isStatePhonePermissionGranted(): Boolean {
+        return checkPermissionFor(phoneStateNumbersPermission)
     }
 
     fun isCameraPermissionGranted(): Boolean {

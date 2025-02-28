@@ -33,7 +33,8 @@ android {
                 getDefaultProguardFile("proguard-android.txt"),
                 "proguardTest-rules.pro"
             )
-            buildConfigField("String", "URL", "\"${project.properties["URL"]}\"")
+            buildConfigField("String", "ROUTER_URL", "\"${project.properties["ROUTER_URL"]}\"")
+            buildConfigField("String", "CORE_URL", "\"${project.properties["CORE_URL"]}\"")
             buildConfigField("String", "INTERVAL", "\"${project.properties["INTERVAL"]}\"")
         }
 
@@ -45,7 +46,8 @@ android {
                 getDefaultProguardFile("proguard-android.txt"),
                 "proguardTest-rules.pro"
             )
-            buildConfigField("String", "URL", "\"${project.properties["URL"]}\"")
+            buildConfigField("String", "ROUTER_URL", "\"${project.properties["ROUTER_URL"]}\"")
+            buildConfigField("String", "CORE_URL", "\"${project.properties["CORE_URL"]}\"")
             buildConfigField("String", "INTERVAL", "\"${project.properties["INTERVAL"]}\"")
         }
     }

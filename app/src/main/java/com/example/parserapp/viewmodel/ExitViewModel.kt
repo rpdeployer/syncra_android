@@ -43,6 +43,8 @@ class ExitViewModel(
                 dataStoreManager.saveName("")
                 WorkManager.getInstance(context)
                     .cancelAllWorkByTag("SMS_SEND_TO_SERVER_JOB")
+                WorkManager.getInstance(context)
+                    .cancelAllWorkByTag("STATUS_SEND_TO_SERVER_JOB")
                 logDao.clearLogs()
                 SmsReceiverManager.unregisterReceiver(context)
             } else {

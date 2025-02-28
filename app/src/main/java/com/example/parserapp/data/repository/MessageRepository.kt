@@ -13,7 +13,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class MessageRepository(context: Context) {
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.URL)
+        .baseUrl(BuildConfig.ROUTER_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
@@ -27,18 +27,20 @@ class MessageRepository(context: Context) {
 
     suspend fun sendSms(timestamp: Long, from: String, to: String, message: String, isSms: Boolean): Boolean {
         val request = MessageRequest(
-            from, to, timestamp, message, isSms
+            from, to, timestamp, message, isSms, deviceId
         )
         return try {
             val response = messageService.sendSms(request)
             response.isSuccessful && response.body()?.success == true
         } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
 
-    suspend fun sendLog(request: LogUploadRequest): Boolean {
+    suspend fun sendLog(log: List<String>): Boolean {
         return try {
+            val request = LogUploadRequest(deviceId, log)
             val response = messageService.uploadLogs(request)
             response.isSuccessful && response.body()?.success == true
         } catch (e: Exception) {

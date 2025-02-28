@@ -24,7 +24,7 @@ import java.io.File
 class UpdateRepository(context: Context) {
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.URL)
+        .baseUrl(BuildConfig.CORE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

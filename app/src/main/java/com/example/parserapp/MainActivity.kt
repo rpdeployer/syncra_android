@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
                 val viewModel = MainViewModel(
                     permissionManager = PermissionManager(LocalContext.current),
                     authRepository = AuthRepository(LocalContext.current),
-                    dataStoreManager = DataStoreManager(LocalContext.current)
+                    dataStoreManager = DataStoreManager(LocalContext.current),
                 )
                 AppNavHost(
                     navController = navController,
@@ -45,7 +45,7 @@ fun GreetingPreview() {
         val viewModel = MainViewModel(
             permissionManager = PermissionManager(LocalContext.current),
             authRepository = AuthRepository(LocalContext.current),
-            dataStoreManager = DataStoreManager(LocalContext.current)
+            dataStoreManager = DataStoreManager(LocalContext.current),
         )
         AppNavHost(
             navController = navController,

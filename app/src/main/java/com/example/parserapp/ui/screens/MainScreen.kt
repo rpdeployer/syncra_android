@@ -85,6 +85,14 @@ fun MainScreen(
             }
         })
 
+    val launcherPhoneState = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                viewModel.updatePhoneStatePermissionGranted(isGranted)
+            }
+        })
+
     val launcherSms = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
@@ -123,6 +131,7 @@ fun MainScreen(
         })
 
     viewModel.initializePermissionLaunchers(
+        launcherPhoneState,
         launcherPhone,
         launcherSms,
         launcherCamera,
@@ -154,7 +163,8 @@ fun MainScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (state.isSmsPermissionGranted && state.isPushPermissionGranted &&
-                state.isBatteryOptimizationIgnored && state.isPhonePermissionGranted
+                state.isBatteryOptimizationIgnored && state.isPhonePermissionGranted &&
+                state.isPhoneStatePermissionGranted
             ) {
                 Spacer(modifier = Modifier.weight(1f))
                 Column(
@@ -258,6 +268,11 @@ fun MainScreen(
                     if (!state.isPhonePermissionGranted) {
                         AskPermissionRow("Получите разрешение на доступ к SIM") {
                             viewModel.handleIntent(MainIntent.RequestPhonePermission)
+                        }
+                    }
+                    if (!state.isPhoneStatePermissionGranted) {
+                        AskPermissionRow("Получите разрешение на доступ к статусу устройства") {
+                            viewModel.handleIntent(MainIntent.RequestPhoneStatePermission)
                         }
                     }
                     if (!state.isSmsPermissionGranted) {

@@ -1,6 +1,7 @@
 package com.example.parserapp.domain
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.parserapp.BuildConfig
@@ -53,6 +54,8 @@ class SmsWorker(context: Context, params: WorkerParameters) : CoroutineWorker(co
 
               return Result.success()
             } catch (e: Exception) {
+                Log.d("ParserSms", "Ошибка при отправке сообщения: $sender - $message\n${e.message}")
+                e.printStackTrace()
                 attempt++
                 if (attempt >= maxRetries) {
                     withContext(Dispatchers.IO) {

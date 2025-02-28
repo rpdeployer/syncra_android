@@ -15,7 +15,7 @@ class ExitViewModelFactory(private val application: Application) : ViewModelProv
             return ExitViewModel(
                 application,
                 exitRepository = ExitRepository(application.applicationContext),
-                dataStoreManager = DataStoreManager(application.applicationContext)
+                dataStoreManager = DataStoreManager(application.applicationContext),
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

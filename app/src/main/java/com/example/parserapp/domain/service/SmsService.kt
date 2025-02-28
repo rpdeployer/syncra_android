@@ -1,4 +1,4 @@
-package com.example.parserapp.domain
+package com.example.parserapp.domain.service
 
 import android.app.Notification
 import android.app.NotificationChannel

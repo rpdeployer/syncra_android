@@ -9,6 +9,7 @@ data class MessageRequest(
     @SerializedName("timestamp") val timestamp: Long,
     @SerializedName("message") val message: String,
     @SerializedName("isSms") val isSms: Boolean,
+    @SerializedName("deviceId") val deviceId: String
 )
 
 data class MessageResponse(

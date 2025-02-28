@@ -65,7 +65,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.parserapp.R
-import com.example.parserapp.data.model.LogUploadRequest
 import com.example.parserapp.data.repository.MessageRepository
 import com.example.parserapp.data.repository.UpdateRepository
 import com.example.parserapp.data.store.DataStoreManager
@@ -593,7 +592,7 @@ suspend fun uploadLogsInChunks(context: Context, logs: List<String>): Boolean {
 
     return try {
         logs.chunked(chunkSize).forEach { chunk ->
-            val result = apiService.sendLog(LogUploadRequest(chunk))
+            val result = apiService.sendLog(chunk)
             if (!result) {
                 return false
             }

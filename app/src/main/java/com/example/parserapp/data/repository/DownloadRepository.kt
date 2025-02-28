@@ -17,7 +17,7 @@ import java.io.InputStream
 class DownloadRepository(context: Context) {
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl(BuildConfig.URL)
+        .baseUrl(BuildConfig.ROUTER_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

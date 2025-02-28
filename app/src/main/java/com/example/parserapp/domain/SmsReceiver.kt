@@ -7,6 +7,7 @@ import android.content.Intent
 import android.provider.Telephony
 import android.telephony.TelephonyManager
 import android.util.Log
+import com.example.parserapp.domain.service.SmsService
 
 class SmsReceiver : BroadcastReceiver() {
 

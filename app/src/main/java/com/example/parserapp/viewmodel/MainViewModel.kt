@@ -11,16 +11,17 @@ import com.example.parserapp.data.repository.AuthRepository
 import com.example.parserapp.data.store.DataStoreManager
 import com.example.parserapp.di.PermissionManager
 import com.example.parserapp.di.SmsReceiverManager
+import com.example.parserapp.di.StatusManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class MainViewModel (
+class MainViewModel(
     val permissionManager: PermissionManager,
     private val authRepository: AuthRepository,
-    private val dataStoreManager: DataStoreManager
+    private val dataStoreManager: DataStoreManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -39,6 +40,7 @@ class MainViewModel (
         .stateIn(viewModelScope, SharingStarted.Lazily, "")
 
     fun initializePermissionLaunchers(
+        phoneStateLauncher: ActivityResultLauncher<String>,
         phoneLauncher: ActivityResultLauncher<String>,
         smsLauncher: ActivityResultLauncher<String>,
         cameraLauncher: ActivityResultLauncher<String>,
@@ -47,6 +49,7 @@ class MainViewModel (
         batteryLauncher: ActivityResultLauncher<Intent>
     ) {
         permissionManager.initializePermissionLaunchers(
+            phoneStateLauncher,
             phoneLauncher,
             smsLauncher,
             cameraLauncher,
@@ -64,6 +67,7 @@ class MainViewModel (
             is MainIntent.RequestCameraPermission -> requestCameraPermission()
             is MainIntent.RequestPushPermission -> requestPushPermission()
             is MainIntent.RequestPhonePermission -> requestPhonePermission()
+            is MainIntent.RequestPhoneStatePermission -> requestPhoneStatePermission()
             is MainIntent.EnterApiKey -> validateApiKeyFormat(intent.key)
             is MainIntent.ValidateKey -> validateApiKey(intent.context)
         }
@@ -75,6 +79,10 @@ class MainViewModel (
 
     private fun requestPhonePermission() {
         permissionManager.requestPhonePermission()
+    }
+
+    private fun requestPhoneStatePermission() {
+        permissionManager.requestPhoneStatePermission()
     }
 
     private fun requestPushPermission() {
@@ -101,6 +109,10 @@ class MainViewModel (
         _state.value = _state.value.copy(isPhonePermissionGranted = isGranted)
     }
 
+    fun updatePhoneStatePermissionGranted(isGranted: Boolean) {
+        _state.value = _state.value.copy(isPhoneStatePermissionGranted = isGranted)
+    }
+
     fun updateCameraPermissionGranted(isGranted: Boolean) {
         _state.value = _state.value.copy(isCameraPermissionGranted = isGranted)
     }
@@ -121,7 +133,12 @@ class MainViewModel (
         val isValid = apiKey.matches(
             Regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")
         )
-        _state.value = _state.value.copy(apiKey = TextFieldValue(text = apiKey, selection = TextRange(apiKey.length)), isApiKeyFormatValid = isValid)
+        _state.value = _state.value.copy(
+            apiKey = TextFieldValue(
+                text = apiKey,
+                selection = TextRange(apiKey.length)
+            ), isApiKeyFormatValid = isValid
+        )
     }
 
     private fun validateApiKey(context: Context) {
@@ -133,7 +150,9 @@ class MainViewModel (
                 saveKey(_state.value.apiKey.text)
                 saveName(resp.first)
                 SmsReceiverManager.registerReceiver(context)
-                _state.value = _state.value.copy(apiKey = TextFieldValue(text = "", selection = TextRange(0)))
+                StatusManager.startStatusWorker(context)
+                _state.value =
+                    _state.value.copy(apiKey = TextFieldValue(text = "", selection = TextRange(0)))
             }
             _state.value = _state.value.copy(
                 isValidating = false,
@@ -155,13 +174,19 @@ class MainViewModel (
     }
 
     fun resetCursorToStart() {
-        _state.value = _state.value.copy(apiKey = TextFieldValue(text = _state.value.apiKey.text, selection = TextRange(0)))
+        _state.value = _state.value.copy(
+            apiKey = TextFieldValue(
+                text = _state.value.apiKey.text,
+                selection = TextRange(0)
+            )
+        )
     }
 
 }
 
 data class PermissionState(
     val isPhonePermissionGranted: Boolean = false,
+    val isPhoneStatePermissionGranted: Boolean = false,
     val isSmsPermissionGranted: Boolean = false,
     val isPushPermissionGranted: Boolean = false,
     val isNetworkPermissionGranted: Boolean = false,
@@ -178,6 +203,7 @@ sealed class MainIntent {
     data object RequestSmsPermission : MainIntent()
     data object RequestPushPermission : MainIntent()
     data object RequestPhonePermission : MainIntent()
+    data object RequestPhoneStatePermission : MainIntent()
     data object RequestBatteryOptimization : MainIntent()
     data object RequestNetworkPermission : MainIntent()
     data object RequestCameraPermission : MainIntent()
