@@ -76,6 +76,7 @@ object StatusRepository {
         return wifiManager.connectionInfo.linkSpeed // Скорость в Mbps
     }
 
+    @SuppressLint("MissingPermission")
     fun getMobileDataSpeed(context: Context): Double {
         val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         val networkType = telephonyManager.dataNetworkType

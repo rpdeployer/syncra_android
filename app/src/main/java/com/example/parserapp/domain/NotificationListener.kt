@@ -5,8 +5,10 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.example.parserapp.domain.service.SmsService
@@ -70,8 +72,7 @@ class NotificationListener : NotificationListenerService() {
 
             val title = extras?.getCharSequence("android.title").toString()
             val text = extras?.getCharSequence("android.text").toString()
-            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-            val phoneNumber = telephonyManager.line1Number
+            val phoneNumber = getPhoneNumber(context) ?: "Неизвестный номер"
 
             Log.d("ParserSms", "Получено PUSH от: $title, текст: $text")
 
@@ -91,5 +92,30 @@ class NotificationListener : NotificationListenerService() {
         }
 
         cancelNotification(sbn!!.key)
+    }
+
+    @SuppressLint("MissingPermission")
+    fun getPhoneNumber(context: Context): String? {
+        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        var phoneNumber: String? = telephonyManager.line1Number
+
+        Log.d("PhoneNumber", "TelephonyManager вернул: $phoneNumber")
+
+        if (phoneNumber.isNullOrEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            val subscriptionManager = context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
+            val subscriptionInfoList = subscriptionManager.activeSubscriptionInfoList
+
+            if (!subscriptionInfoList.isNullOrEmpty()) {
+                phoneNumber = subscriptionInfoList[0].number
+                Log.d("PhoneNumber", "SubscriptionManager вернул: $phoneNumber")
+            }
+        }
+
+        if (phoneNumber.isNullOrEmpty()) {
+            Log.d("PhoneNumber", "Не удалось получить номер телефона.")
+            return null
+        }
+
+        return phoneNumber
     }
 }
