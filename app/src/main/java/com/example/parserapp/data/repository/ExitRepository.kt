@@ -28,7 +28,7 @@ class ExitRepository(context: Context) {
         val request = ExitRequest(apiKey, deviceId)
         return try {
             val response = exitService.exit(request)
-            response.isSuccessful && response.body()?.success == true
+            response.isSuccessful && response.body()?.isSuccess!!
         } catch (e: Exception) {
             false
         }

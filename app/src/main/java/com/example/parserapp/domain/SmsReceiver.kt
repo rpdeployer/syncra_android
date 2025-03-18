@@ -9,9 +9,25 @@ import android.provider.Telephony
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.util.Log
+import com.example.parserapp.di.AppDatabase
 import com.example.parserapp.domain.service.SmsService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 
 class SmsReceiver : BroadcastReceiver() {
+
+    private suspend fun shouldProcessMessage(context: Context, sender: String): Boolean {
+        val senderDao = AppDatabase.getDatabase(context).senderDao()
+        return withContext(Dispatchers.IO) {
+            senderDao.getAllSenders()
+                .firstOrNull()
+                ?.any { it.name == sender } ?: false
+        }
+    }
 
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
@@ -19,27 +35,34 @@ class SmsReceiver : BroadcastReceiver() {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             if (messages.isNotEmpty()) {
                 val sender = messages[0].displayOriginatingAddress
-                val fullMessage = StringBuilder()
+                CoroutineScope(Dispatchers.IO).launch {
+                    if (shouldProcessMessage(context, sender.trim())) {
+                        val fullMessage = StringBuilder()
 
-                for (msg in messages) {
-                    fullMessage.append(msg.messageBody)
-                }
+                        for (msg in messages) {
+                            fullMessage.append(msg.messageBody)
+                        }
 
-                val phoneNumber = getPhoneNumber(context) ?: "Неизвестный номер"
+                        val phoneNumber = getPhoneNumber(context) ?: "Неизвестный номер"
 
-                Log.d("ParserSms", "Получено SMS от: $sender, текст: $fullMessage")
+                        Log.d("ParserSms", "Получено SMS от: $sender, текст: $fullMessage")
 
-                val smsIntent = Intent(context, SmsService::class.java).apply {
-                    putExtra("phoneNumber", phoneNumber)
-                    putExtra("sender", sender)
-                    putExtra("message", fullMessage.toString()) // Передаем объединенное сообщение
-                    putExtra("isSms", true)
-                }
+                        val smsIntent = Intent(context, SmsService::class.java).apply {
+                            putExtra("phoneNumber", phoneNumber)
+                            putExtra("sender", sender)
+                            putExtra(
+                                "message",
+                                fullMessage.toString()
+                            )
+                            putExtra("isSms", true)
+                        }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(smsIntent)
-                } else {
-                    context.startService(smsIntent)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            context.startForegroundService(smsIntent)
+                        } else {
+                            context.startService(smsIntent)
+                        }
+                    }
                 }
             }
         }
@@ -47,13 +70,15 @@ class SmsReceiver : BroadcastReceiver() {
 
     @SuppressLint("MissingPermission")
     fun getPhoneNumber(context: Context): String? {
-        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        val telephonyManager =
+            context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
         var phoneNumber: String? = telephonyManager.line1Number
 
         Log.d("PhoneNumber", "TelephonyManager вернул: $phoneNumber")
 
         if (phoneNumber.isNullOrEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            val subscriptionManager = context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
+            val subscriptionManager =
+                context.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE) as SubscriptionManager
             val subscriptionInfoList = subscriptionManager.activeSubscriptionInfoList
 
             if (!subscriptionInfoList.isNullOrEmpty()) {
@@ -69,4 +94,5 @@ class SmsReceiver : BroadcastReceiver() {
 
         return phoneNumber
     }
+
 }

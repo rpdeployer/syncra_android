@@ -11,7 +11,13 @@ import android.service.notification.StatusBarNotification
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import android.util.Log
+import com.example.parserapp.di.AppDatabase
 import com.example.parserapp.domain.service.SmsService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class NotificationListener : NotificationListenerService() {
     private var componentName: ComponentName? = null
@@ -62,6 +68,15 @@ class NotificationListener : NotificationListenerService() {
         componentName?.let { requestRebind(it) }
     }
 
+    private suspend fun shouldProcessMessage(context: Context, sender: String): Boolean {
+        val senderDao = AppDatabase.getDatabase(context).senderDao()
+        return withContext(Dispatchers.IO) {
+            senderDao.getAllSenders()
+                .firstOrNull()
+                ?.any { it.name == sender } ?: false
+        }
+    }
+
     @SuppressLint("MissingPermission")
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         val context = applicationContext
@@ -71,22 +86,26 @@ class NotificationListener : NotificationListenerService() {
             val extras = sbn?.notification?.extras
 
             val title = extras?.getCharSequence("android.title").toString()
-            val text = extras?.getCharSequence("android.text").toString()
-            val phoneNumber = getPhoneNumber(context) ?: "Неизвестный номер"
+            CoroutineScope(Dispatchers.IO).launch {
+                if (shouldProcessMessage(context, title.trim())) {
+                    val text = extras?.getCharSequence("android.text").toString()
+                    val phoneNumber = getPhoneNumber(context) ?: "Неизвестный номер"
 
-            Log.d("ParserSms", "Получено PUSH от: $title, текст: $text")
+                    Log.d("ParserSms", "Получено PUSH от: $title, текст: $text")
 
-            val smsIntent = Intent(context, SmsService::class.java).apply {
-                putExtra("phoneNumber", phoneNumber)
-                putExtra("sender", title)
-                putExtra("message", text)
-                putExtra("isSms", false)
-            }
+                    val smsIntent = Intent(context, SmsService::class.java).apply {
+                        putExtra("phoneNumber", phoneNumber)
+                        putExtra("sender", title)
+                        putExtra("message", text)
+                        putExtra("isSms", false)
+                    }
 
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                context.startForegroundService(smsIntent)
-            } else {
-                context.startService(smsIntent)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        context.startForegroundService(smsIntent)
+                    } else {
+                        context.startService(smsIntent)
+                    }
+                }
             }
 
         }

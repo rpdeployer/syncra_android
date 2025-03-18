@@ -6,14 +6,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.parserapp.data.dao.LogMessageDao
 import com.example.parserapp.data.dao.ProcessedMessageDao
+import com.example.parserapp.data.dao.SenderDao
 import com.example.parserapp.data.entities.LogMessage
 import com.example.parserapp.data.entities.ProcessedMessageEntity
+import com.example.parserapp.data.entities.SenderEntity
 
-@Database(entities = [LogMessage::class, ProcessedMessageEntity::class], version = 2, exportSchema = false)
+@Database(entities = [LogMessage::class, ProcessedMessageEntity::class, SenderEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun logMessageDao(): LogMessageDao
     abstract fun processedMessageDao(): ProcessedMessageDao
+    abstract fun senderDao(): SenderDao
 
     companion object {
         @Volatile

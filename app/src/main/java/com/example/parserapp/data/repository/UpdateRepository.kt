@@ -36,7 +36,7 @@ class UpdateRepository(context: Context) {
                 val response = withContext(Dispatchers.IO) { updateService.checkUpdate() }
                 val currentVersion = BuildConfig.VERSION_NAME
 
-                if (compareVersions(currentVersion, response.body()!!.latestVersion) != -1) {
+                if (compareVersions(currentVersion, response.body()!!.value!!.latestVersion) != -1) {
                     Toast.makeText(context, "У вас уже последняя версия", Toast.LENGTH_LONG).show()
                 } else {
                     Toast.makeText(
@@ -45,7 +45,7 @@ class UpdateRepository(context: Context) {
                         Toast.LENGTH_SHORT
                     ).show()
                     var result =
-                        DownloadRepository(context).downloadApkFile(response.body()!!.apkUrl)
+                        DownloadRepository(context).downloadApkFile(response.body()!!.value!!.apkUrl)
                     if (result) {
                         ApkInstaller.installApk(context)
                     } else {
