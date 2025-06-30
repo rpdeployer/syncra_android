@@ -11,7 +11,7 @@ object StatusManager {
     fun startStatusWorker(context: Context) {
         val workRequest = OneTimeWorkRequestBuilder<StatusWorker>()
             .addTag("STATUS_SEND_TO_SERVER_JOB")
-            .setInitialDelay(3, TimeUnit.MINUTES)
+            .setInitialDelay(1, TimeUnit.MINUTES)
             .build()
 
         WorkManager.getInstance(context).enqueue(

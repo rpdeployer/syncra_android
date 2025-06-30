@@ -7,7 +7,3 @@ data class ExitRequest(
     @SerializedName("key") val key: String,
     @SerializedName("deviceId") val deviceId: String
 )
-
-data class ExitResponse(
-    @SerializedName("success") val success: Boolean
-)

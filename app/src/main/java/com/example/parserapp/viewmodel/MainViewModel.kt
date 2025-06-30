@@ -27,6 +27,7 @@ class MainViewModel(
     private val _state = MutableStateFlow(
         PermissionState(
             permissionManager.isPhonePermissionGranted(),
+            permissionManager.isStatePhonePermissionGranted(),
             permissionManager.isSmsPermissionGranted(),
             permissionManager.isPushPermissionGranted(),
             permissionManager.isNetworkPermissionGranted(),

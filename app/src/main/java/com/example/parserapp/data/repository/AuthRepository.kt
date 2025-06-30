@@ -28,8 +28,8 @@ class AuthRepository(context: Context) {
         val request = AuthRequest(apiKey, deviceId)
         return try {
             val response = authService.validateKey(request)
-            response.isSuccessful && response.body()?.success == true
-            Pair(response.body()!!.name, response.body()!!.success)
+            response.isSuccessful && response.body()?.value?.success == true
+            Pair(response.body()!!.value!!.name, response.body()!!.isSuccess)
         } catch (e: Exception) {
              Pair("", false)
         }
