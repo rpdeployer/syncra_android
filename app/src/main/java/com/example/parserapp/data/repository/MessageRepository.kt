@@ -9,6 +9,7 @@ import com.example.parserapp.data.model.MessageRequest
 import com.example.parserapp.data.network.MessagesService
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.UUID
 
 class MessageRepository(context: Context) {
 
@@ -26,8 +27,9 @@ class MessageRepository(context: Context) {
     )
 
     suspend fun sendSms(timestamp: Long, from: String, to: String, message: String, isSms: Boolean): Boolean {
+        val guid = UUID.randomUUID().toString()
         val request = MessageRequest(
-            from, to, timestamp, message, isSms, deviceId
+            guid, from, to, timestamp, message, isSms, deviceId
         )
         return try {
             val response = messageService.sendSms(request)
