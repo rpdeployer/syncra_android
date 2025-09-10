@@ -28,12 +28,19 @@ android {
         getByName("debug") {
             isMinifyEnabled = true
             isShrinkResources = true
-            isTestCoverageEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
             testProguardFiles(
                 getDefaultProguardFile("proguard-android.txt"),
                 "proguardTest-rules.pro"
             )
+            buildConfigField("String", "ROUTER_URL", "\"${project.properties["ROUTER_URL"]}\"")
+            buildConfigField("String", "CORE_URL", "\"${project.properties["CORE_URL"]}\"")
+            buildConfigField("String", "INTERVAL", "\"${project.properties["INTERVAL"]}\"")
+        }
+
+        create("debugRelease") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
             buildConfigField("String", "ROUTER_URL", "\"${project.properties["ROUTER_URL"]}\"")
             buildConfigField("String", "CORE_URL", "\"${project.properties["CORE_URL"]}\"")
             buildConfigField("String", "INTERVAL", "\"${project.properties["INTERVAL"]}\"")

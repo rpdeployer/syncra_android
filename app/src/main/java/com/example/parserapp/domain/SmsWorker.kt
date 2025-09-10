@@ -23,6 +23,7 @@ class SmsWorker(context: Context, params: WorkerParameters) : CoroutineWorker(co
         val sender = inputData.getString("sender") ?: return Result.failure()
         val message = inputData.getString("message") ?: return Result.failure()
         val timestamp = inputData.getString("timestamp") ?: return Result.failure()
+        val isSms = inputData.getBoolean("isSms", true )
 
         val database = AppDatabase.getDatabase(applicationContext)
         val logDao = database.logMessageDao()
@@ -39,7 +40,7 @@ class SmsWorker(context: Context, params: WorkerParameters) : CoroutineWorker(co
                     sender,
                     phoneNumber,
                     message,
-                    true
+                    isSms
                 )
 
                 withContext(Dispatchers.IO) {

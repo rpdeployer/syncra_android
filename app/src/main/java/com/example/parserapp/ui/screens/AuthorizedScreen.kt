@@ -563,7 +563,7 @@ fun Dialog(onDismiss: () -> Unit, title: String, text: String, icon: ImageVector
 }
 
 fun collectLogs(): List<String> {
-    val process = Runtime.getRuntime().exec("logcat -d")
+    val process = Runtime.getRuntime().exec("logcat -d | grep 'com.example.parserapp'")
     val reader = BufferedReader(InputStreamReader(process.inputStream))
     val logs = mutableListOf<String>()
 

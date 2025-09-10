@@ -6,6 +6,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
 import android.os.BatteryManager
+import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
@@ -85,10 +86,29 @@ object StatusRepository {
         }
     }
 
+//    fun getWifiSpeed(context: Context): Double {
+//        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+//        return wifiManager.connectionInfo.linkSpeed.toDouble() // Скорость в Mbps
+//    }
+
     fun getWifiSpeed(context: Context): Double {
         val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        return wifiManager.connectionInfo.linkSpeed.toDouble() // Скорость в Mbps
+        val wifiInfo = wifiManager.connectionInfo ?: return -1.0
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Начиная с Android 10+
+            val rxSpeed = wifiInfo.rxLinkSpeedMbps // скорость приёма
+            val txSpeed = wifiInfo.txLinkSpeedMbps // скорость передачи
+
+            // Можно возвращать среднее, или одно из значений
+            (txSpeed / 2.0).toDouble()
+        } else {
+            // Старый API для обратной совместимости
+            @Suppress("DEPRECATION")
+            wifiInfo.linkSpeed.toDouble()
+        }
     }
+
 
     @SuppressLint("MissingPermission")
     fun getMobileDataSpeed(context: Context): Double {

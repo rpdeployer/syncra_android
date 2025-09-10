@@ -41,7 +41,8 @@ class SmsReceiver : BroadcastReceiver() {
             if (messages.isNotEmpty()) {
                 val sender = messages[0].displayOriginatingAddress
                 CoroutineScope(Dispatchers.IO).launch {
-                    if (shouldProcessMessage(context, sender.trim())) {
+                    val shouldProcess = shouldProcessMessage(context, sender.trim())
+                    if (shouldProcess) {
                         val fullMessage = StringBuilder()
 
                         for (msg in messages) {
