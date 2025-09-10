@@ -68,12 +68,17 @@ class NotificationListener : NotificationListenerService() {
         componentName?.let { requestRebind(it) }
     }
 
+    private fun String.normalizeSms(): String =
+        this.replace(Regex("[\\u0000-\\u001F\\u007F-\\u009F\\u200B\\uFEFF\\u00A0\\s\"']+"), "")
+            .lowercase()
+
     private suspend fun shouldProcessMessage(context: Context, sender: String): Boolean {
         val senderDao = AppDatabase.getDatabase(context).senderDao()
         return withContext(Dispatchers.IO) {
+            val normalizedSender = sender.normalizeSms()
             senderDao.getAllSenders()
                 .firstOrNull()
-                ?.any { it.name == sender } ?: false
+                ?.any { it.name.normalizeSms() == normalizedSender } ?: false
         }
     }
 
@@ -87,7 +92,10 @@ class NotificationListener : NotificationListenerService() {
 
             val title = extras?.getCharSequence("android.title").toString()
             CoroutineScope(Dispatchers.IO).launch {
-                if (shouldProcessMessage(context, title.trim())) {
+                val shouldProcess = shouldProcessMessage(context, title.trim());
+                Log.d("ParserSms", "Получено PUSH от: $title, isNeedToProcess: $shouldProcess")
+
+                if (shouldProcess) {
                     val text = extras?.getCharSequence("android.text").toString()
                     val phoneNumber = getPhoneNumber(context) ?: "Неизвестный номер"
 
